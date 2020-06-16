@@ -2,60 +2,65 @@ package ru.netology.web;
 
 import com.github.javafaker.Faker;
 import io.restassured.builder.RequestSpecBuilder;
+import io.restassured.filter.log.LogDetail;
+import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 
 import lombok.Data;
-
-
+import java.util.Locale;
 import static io.restassured.RestAssured.given;
 
 @Data
-//@AllArgsConstructor
 public class GenerateUsers {
-    private static RequestSpecification requestSpec = (RequestSpecification) new RequestSpecBuilder();
+    private static RequestSpecification requestSpec = new RequestSpecBuilder()
+            .setBaseUri("http://localhost")
+            .setPort(9999)
+            .setAccept(ContentType.JSON)
+            .setContentType(ContentType.JSON)
+            .log(LogDetail.ALL)
+            .build();
 
     public static RegistrationDto generateValidActiveUser() {
-        Faker faker = new Faker();
-        return new RegistrationDto(
+        Faker faker = new Faker(new Locale("en"));
+        RegistrationDto validUser = new RegistrationDto(
                 faker.name().firstName().toLowerCase(),
-                faker.internet().password(8, 8),
+                faker.internet().password(),
                 "active");
+        makeRegistration(validUser);
+        return validUser;
     }
 
     public static RegistrationDto generateValidBlockedUser() {
-        Faker faker = new Faker();
-        return new RegistrationDto(
-                faker.name().firstName().toLowerCase(),
-                faker.internet().password(8, 8),
-                "blocked");
+        Faker faker = new Faker(new Locale("en"));
+        String login = faker.name().firstName().toLowerCase();
+        String password = faker.internet().password();
+        makeRegistration(new RegistrationDto(login,password,"active"));
+        return new RegistrationDto(login,password,"blocked");
     }
 
     public static RegistrationDto generateUserInvalidLogin() {
-        Faker faker = new Faker();
-        return new RegistrationDto(
-                faker.internet().emailAddress(),
-                faker.internet().password(8, 8),
-                "blocked");
+        Faker faker = new Faker(new Locale("en"));
+        String password = faker.internet().password();
+        String status = "active";
+        makeRegistration(new RegistrationDto("vasya",password,status));
+        return new RegistrationDto("petya",password,status);
     }
 
     public static RegistrationDto generateUserInvalidPassword() {
-        Faker faker = new Faker();
-        return new RegistrationDto(
-                faker.name().firstName().toLowerCase(),
-                faker.internet().emailAddress(),
-                "blocked");
+        Faker faker = new Faker(new Locale("en"));
+        String login = faker.name().firstName().toLowerCase();
+        String status = "active";
+        makeRegistration(new RegistrationDto(login,"password",status));
+        return new RegistrationDto(login,"parole",status);
     }
 
     static void makeRegistration(RegistrationDto registrationDto) {
-        // сам запрос
-        given() // "дано"
-                .spec(requestSpec) // указываем, какую спецификацию используем
-                //.body(new RegistrationDto("vasya", "password", "active"))
-                .body(registrationDto(registrationDto.getLogin(), registrationDto.getPassword(), registrationDto.getStatus()) // передаём в теле объект, который будет преобразован в JSON
-                        .when() // "когда"
-                        .post("/api/system/users") // на какой путь, относительно BaseUri отправляем запрос
-                        .then() // "тогда ожидаем"
-                        .statusCode(200); // код 200 OK
+        given()
+                .spec(requestSpec)
+                .body(registrationDto)
+                        .when()
+                        .post("/api/system/users")
+                        .then()
+                        .statusCode(200);
     }
-
 }
