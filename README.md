@@ -1,5 +1,8 @@
 # Создание клиентов банка в тестовом режиме
 Запуск сервиса создания клиентов интернет - банка в тестовом режиме
+
+[![Build status](https://ci.appveyor.com/api/projects/status/f2e06y79g5s3rh8x?svg=true)](https://ci.appveyor.com/project/nicklada/autohw5task2)
+
 ## Начало работы
 1. Установите необходимое ПО на компьютер.
 1. Загрузите приложение [app-ibank.jar](https://github.com/netology-code/aqa-homeworks/blob/aqa4/patterns/app-ibank.jar)
