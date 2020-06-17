@@ -34,7 +34,7 @@ public class GenerateUsers {
         Faker faker = new Faker(new Locale("en"));
         String login = faker.name().firstName().toLowerCase();
         String password = faker.internet().password();
-        makeRegistration(new RegistrationDto(login,password,"active"));
+        makeRegistration(new RegistrationDto(login,password,"blocked"));
         return new RegistrationDto(login,password,"blocked");
     }
 
